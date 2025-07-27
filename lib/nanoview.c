@@ -176,7 +176,7 @@ void nkView_RenderTree(nkView_t *root, nkDrawContext_t *drawContext)
 
 }
 
-void nkView_ProcessPointerMovement(nkView_t *root, float x, float y, nkView_t **hotView)
+void nkView_ProcessPointerMovement(nkView_t *root, float x, float y, nkView_t **hotView, nkView_t *activeView, nkPointerAction_t activeAction)
 {
     if (root == NULL || hotView == NULL)
     {
@@ -204,6 +204,86 @@ void nkView_ProcessPointerMovement(nkView_t *root, float x, float y, nkView_t **
     else if (*hotView != NULL && newHotView->capturePointerMovement && (*hotView)->pointerMovementCallback)
     {
         (*hotView)->pointerMovementCallback(*hotView, x, y);
+    }
+
+    /* If there is an active view, process the pointer movement in it */
+    if (activeView != NULL && activeView->capturePointerAction && activeView->pointerActionCallback)
+    {
+        activeView->pointerActionCallback(activeView, activeAction, POINTER_EVENT_DRAG, x, y); 
+    }
+}
+
+void nkView_ProcessPointerAction(nkView_t *root, nkPointerAction_t action, nkPointerEvent_t event, float x, float y, nkView_t *hotView, nkView_t **activeView, nkPointerAction_t *activeAction)
+{
+
+    if (root == NULL || activeView == NULL || activeAction == NULL)
+    {
+
+        return;
+    }
+
+    switch (event)
+    {
+        case POINTER_EVENT_BEGIN:
+        {
+            /* check if there is an active view */
+            if (*activeView != hotView)
+            {
+                /* if there is an active view, end the action */
+                if (*activeView != NULL && (*activeView)->capturePointerAction && (*activeView)->pointerActionCallback)
+                {
+                    (*activeView)->pointerActionCallback(*activeView, *activeAction, POINTER_EVENT_END, x, y);
+                }
+
+            }
+            
+            /* set the new active view */
+            *activeView = hotView;
+            *activeAction = action;
+
+            if (hotView && hotView->capturePointerAction && hotView->pointerActionCallback)
+            {
+                hotView->pointerActionCallback(hotView, action, POINTER_EVENT_BEGIN, x, y);
+            }
+
+        } break;
+
+        case POINTER_EVENT_END:
+        {
+            if (*activeView != NULL)
+            {
+                /* call the action end callback */
+                if ((*activeView)->capturePointerAction && (*activeView)->pointerActionCallback)
+                {
+                    (*activeView)->pointerActionCallback(*activeView, *activeAction, POINTER_EVENT_END, x, y);
+                }
+
+                /* reset active view and action */
+                *activeView = NULL;
+                *activeAction = NK_POINTER_ACTION_PRIMARY; /* reset to default primary action */
+            }
+        } break;
+
+        case POINTER_EVENT_CANCEL:
+        {
+            /* cancel the action if there is an active view */
+            if (*activeView != NULL)
+            {
+                if ((*activeView)->capturePointerAction && (*activeView)->pointerActionCallback)
+                {
+                    (*activeView)->pointerActionCallback(*activeView, *activeAction, POINTER_EVENT_CANCEL, x, y);
+                }
+
+                /* reset active view and action */
+                *activeView = NULL;
+                *activeAction = NK_POINTER_ACTION_PRIMARY; /* reset to default primary action */
+            }
+        } break;
+
+        case POINTER_EVENT_DOUBLE:
+        {
+            /* double click, TODO */
+        } break;
     }
 }
 

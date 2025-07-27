@@ -45,6 +45,7 @@ typedef enum
     POINTER_EVENT_BEGIN,
     POINTER_EVENT_END,
     POINTER_EVENT_DOUBLE,
+    POINTER_EVENT_DRAG,
     POINTER_EVENT_CANCEL
 } nkPointerEvent_t;
 
@@ -57,15 +58,14 @@ typedef enum
     NK_POINTER_ACTION_EXTENDED_2        = 0x05
 } nkPointerAction_t;
 
-
 typedef void (*ViewMeasureCallback_t)(struct nkView_t *view); 
 typedef void (*ViewArrangeCallback_t)(struct nkView_t *view);
 typedef void (*ViewDrawCallback_t)(struct nkView_t *view); 
 typedef void (*ViewDestroyCallback_t)(struct nkView_t *view); /* called when view is destroyed */
 
 typedef void (*PointerHoverCallback_t)(struct nkView_t *view, nkPointerHover_t event);
-typedef void (*PointerMovementCallback_t)(struct nkView_t *view, float x, float y); /* x, y relative to view origin */
-typedef void (*PointerActionCallback_t)(struct nkView_t *view, nkPointerAction_t action, nkPointerEvent_t event, float x, float y); /* x, y relative to view origin */
+typedef void (*PointerMovementCallback_t)(struct nkView_t *view, float x, float y); /* x, y in window coords */
+typedef void (*PointerActionCallback_t)(struct nkView_t *view, nkPointerAction_t action, nkPointerEvent_t event, float x, float y); /* x, y in window coords */
 typedef void (*ScrollCallback_t)(struct nkView_t *view, float delta);
 
 typedef enum 
@@ -167,7 +167,8 @@ void nkView_Destroy(nkView_t *view);
 /* VIEW TREE USAGE */
 void nkView_LayoutTree(nkView_t *root, nkSize_t size);
 void nkView_RenderTree(nkView_t *root, nkDrawContext_t *drawContext);
-void nkView_ProcessPointerMovement(nkView_t *root, float x, float y, nkView_t **hotView);
+void nkView_ProcessPointerMovement(nkView_t *root, float x, float y, nkView_t **hotView, nkView_t *activeView, nkPointerAction_t activeAction);
+void nkView_ProcessPointerAction(nkView_t *root, nkPointerAction_t action, nkPointerEvent_t event, float x, float y, nkView_t *hotView, nkView_t **activeView, nkPointerAction_t *activeAction);
 
 /* VIEW TREE MANAGEMENT */
 

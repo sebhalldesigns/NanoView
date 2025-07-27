@@ -34,10 +34,39 @@
 
 struct nkView_t; /* forward declaration */
 
+typedef enum
+{
+    HOVER_BEGIN,
+    HOVER_END
+} nkPointerHover_t;
+
+typedef enum
+{
+    POINTER_EVENT_BEGIN,
+    POINTER_EVENT_END,
+    POINTER_EVENT_DOUBLE,
+    POINTER_EVENT_CANCEL
+} nkPointerEvent_t;
+
+typedef enum
+{
+    NK_POINTER_ACTION_PRIMARY           = 0x01,
+    NK_POINTER_ACTION_SECONDARY         = 0x02,
+    NK_POINTER_ACTION_TERTIARY          = 0x03,
+    NK_POINTER_ACTION_EXTENDED_1        = 0x04,
+    NK_POINTER_ACTION_EXTENDED_2        = 0x05
+} nkPointerAction_t;
+
+
 typedef void (*ViewMeasureCallback_t)(struct nkView_t *view); 
 typedef void (*ViewArrangeCallback_t)(struct nkView_t *view);
 typedef void (*ViewDrawCallback_t)(struct nkView_t *view); 
 typedef void (*ViewDestroyCallback_t)(struct nkView_t *view); /* called when view is destroyed */
+
+typedef void (*PointerHoverCallback_t)(struct nkView_t *view, nkPointerHover_t event);
+typedef void (*PointerMovementCallback_t)(struct nkView_t *view, float x, float y); /* x, y relative to view origin */
+typedef void (*PointerActionCallback_t)(struct nkView_t *view, nkPointerAction_t action, nkPointerEvent_t event, float x, float y); /* x, y relative to view origin */
+typedef void (*ScrollCallback_t)(struct nkView_t *view, float delta);
 
 typedef enum 
 {
@@ -91,6 +120,13 @@ typedef struct nkView_t
     struct nkView_t *prevSibling; /* can be NULL*/
     struct nkView_t *child; /* can be NULL*/
 
+    /* event capture flags */
+    bool capturePointerHover;
+    bool capturePointerMovement; /* capture move events */
+    bool capturePointerAction;
+    bool captureScroll;
+
+
     /* Generic layout requests to parent */
     nkStretchType_t stretchType;
     nkHorizontalAlignment_t horizontalAlignment;
@@ -106,6 +142,10 @@ typedef struct nkView_t
     ViewArrangeCallback_t arrangeCallback;
     ViewDrawCallback_t drawCallback; /* called when view should be drawn */
     ViewDestroyCallback_t destroyCallback; /* called when view is destroyed */
+    PointerHoverCallback_t pointerHoverCallback; /* called when pointer enters and exits the view */
+    PointerMovementCallback_t pointerMovementCallback; /* called when pointer moves over the view */
+    PointerActionCallback_t pointerActionCallback; /* called when pointer events occur */
+    ScrollCallback_t scrollCallback; /* called when scroll events occur */
 
     nkColor_t backgroundColor;
 
@@ -124,11 +164,10 @@ bool nkView_Create(nkView_t *view, const char *name);
 /* detroys view and all children */
 void nkView_Destroy(nkView_t *view);
 
-/* called by system on window resize */
-void nkView_Layout(nkView_t *view);
-
-/* called by system when view should be rendered */
-void nkView_Draw(nkView_t *view);
+/* VIEW TREE USAGE */
+void nkView_LayoutTree(nkView_t *root, nkSize_t size);
+void nkView_RenderTree(nkView_t *root, nkDrawContext_t *drawContext);
+void nkView_ProcessPointerMovement(nkView_t *root, float x, float y, nkView_t **hotView);
 
 /* VIEW TREE MANAGEMENT */
 
@@ -137,7 +176,6 @@ void nkView_RemoveChildView(nkView_t *parent, nkView_t *child);
 void nkView_RemoveView(nkView_t *view);
 void nkView_InsertView(nkView_t *parent, nkView_t *child, nkView_t *before);
 void nkView_ReplaceView(nkView_t *oldView, nkView_t *newView);
-
 
 /* TREE TRAVERSAL */
 
@@ -149,6 +187,9 @@ nkView_t *nkView_FirstChildView(nkView_t *view);
 nkView_t *nkView_LastChildView(nkView_t *view);
 nkView_t *nkView_NextSiblingView(nkView_t *view);
 nkView_t *nkView_PreviousSiblingView(nkView_t *view);
+
+/* HIT TESTING */
+nkView_t *nkView_HitTest(nkView_t *view, float x, float y); /* in window co-ordinates */
 
 
 #endif /* NANOVIEW_H */

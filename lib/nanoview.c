@@ -79,17 +79,132 @@ bool nkView_Create(nkView_t *view, const char *name)
 
 void nkView_Destroy(nkView_t *view)
 {
+    if (view == NULL)
+    {
+        return;
+    }
+    
     return;
 }
 
-void nkView_Layout(nkView_t *view)
+void nkView_LayoutTree(nkView_t *root, nkSize_t size)
 {
+    if (root == NULL)
+    {
+        return;
+    }
+
+    nkView_t *view = root;
+
+    root->frame = (nkRect_t){0, 0, size.width, size.height};
+
+
+    /* MEASURE PASS */
+
+    view = nkView_DeepestViewInTree(root);
     
+    /* measure views in a bottom-up traversal */
+
+    while (view)
+    {
+        if (view->measureCallback)
+        {
+            view->measureCallback(view);
+        }
+
+        view = nkView_PreviousViewInTree(view);
+    }
+
+    /* ARRANGE PASS */
+
+    view = root;
+
+    /* clamp root to size */
+
+    if (root->sizeRequest.width > root->frame.width)
+    {
+        root->frame.width = root->sizeRequest.width;
+    }
+    
+    if (root->sizeRequest.height > root->frame.height)
+    {
+        root->frame.height = root->sizeRequest.height;
+    }
+
+    /* arrange views in top-down */
+    while (view)
+    {
+
+        if (view->arrangeCallback)
+        {
+            view->arrangeCallback(view);
+        }
+
+        view = nkView_NextViewInTree(view);
+    }
+
 }
 
-void nkView_Draw(nkView_t *view)
+void nkView_RenderTree(nkView_t *root, nkDrawContext_t *drawContext)
 {
+    if (root == NULL || drawContext == NULL)
+    {
+        return;
+    }
 
+    nkView_t *view = root;
+
+    /* render views in a top-down traversal (this is actually bottom up in visual tree 
+       as child views appear on top) */
+
+    while (view)
+    {
+
+        if (view->backgroundColor.a > 0.001f)
+        {
+            nkDraw_SetColor(drawContext, view->backgroundColor);
+            nkDraw_Rect(drawContext, view->frame.x, view->frame.y, view->frame.width, view->frame.height);
+        }
+
+        if (view->drawCallback)
+        {
+            view->drawCallback(view);
+        }
+
+        view = nkView_NextViewInTree(view);
+    }
+
+}
+
+void nkView_ProcessPointerMovement(nkView_t *root, float x, float y, nkView_t **hotView)
+{
+    if (root == NULL || hotView == NULL)
+    {
+        return;
+    }
+
+    nkView_t *newHotView = nkView_HitTest(root, x, y);
+
+    /* check for change */
+    if (*hotView != newHotView)
+    {
+        /* Pointer moved to a different view, process the pointer movement */
+        if (*hotView != NULL && (*hotView)->capturePointerHover && (*hotView)->pointerHoverCallback)
+        {
+            (*hotView)->pointerHoverCallback(*hotView, HOVER_END);
+        }
+
+        if (newHotView != NULL && newHotView->capturePointerHover && newHotView->pointerHoverCallback)
+        {
+            newHotView->pointerHoverCallback(newHotView, HOVER_BEGIN);
+        }
+
+        *hotView = newHotView; /* Update the hot view */
+    }
+    else if (*hotView != NULL && newHotView->capturePointerMovement && (*hotView)->pointerMovementCallback)
+    {
+        (*hotView)->pointerMovementCallback(*hotView, x, y);
+    }
 }
 
 /* tree structure functions */
@@ -374,7 +489,47 @@ nkView_t *nkView_PreviousSiblingView(nkView_t *view)
     return view->prevSibling;
 }
 
+nkView_t* nkView_HitTest(nkView_t *view, float x, float y)
+{
 
+    bool inView = (
+            (x >= view->frame.x)
+        &&  (x <= (view->frame.x + view->frame.width))
+        &&  (y >= view->frame.y) 
+        &&  (y <= (view->frame.y + view->frame.height))
+    );
+
+    /* if not in this view, neither view nor any child can pass the test */
+    if (!view || !inView)
+    {
+        return NULL;
+    }
+
+    /* search children top-down */
+    nkView_t *child = nkView_LastChildView(view);
+
+    while (child)
+    {
+        nkView_t *hitView = nkView_HitTest(child, x, y);
+
+        if (hitView)
+        {
+            /* a child passed the hit test, so this takes precedence */
+            return hitView;
+        }
+
+        child = nkView_PreviousSiblingView(child);
+    }
+
+    /* check if this view wants events */
+    if (view->capturePointerHover || view->capturePointerMovement || view->capturePointerAction)
+    {
+        return view;
+    }
+
+    /* this view doesn't want events, so treat as invisible */
+    return NULL;
+}
 
 /***************************************************************
 ** MARK: STATIC FUNCTIONS

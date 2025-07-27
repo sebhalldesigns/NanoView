@@ -2,12 +2,12 @@
 **
 ** NanoKit Library Source File
 **
-** File         :  view.c
-** Module       :  view
+** File         :  nkdockview.c
+** Module       :  views
 ** Author       :  SH
 ** Created      :  2025-02-23 (YYYY-MM-DD)
 ** License      :  MIT
-** Description  :  NanoKit View API
+** Description  :  NanoKit Dock View
 **
 ***************************************************************/
 
@@ -20,6 +20,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 
 /***************************************************************
 ** MARK: CONSTANTS & MACROS
@@ -54,7 +55,7 @@ bool nkDockView_Create(nkDockView_t *dockView)
     dockView->view.measureCallback = MeasureCallback;
     dockView->view.arrangeCallback = ArrangeCallback;
 
-    // Set default values
+    /* Set default values */
     dockView->lastChildFill = true;
 
     dockView->view.data = dockView;
@@ -82,24 +83,28 @@ static void MeasureCallback(nkView_t *view)
 
     while (child)
     {
-        // We assume child->sizeRequest is already filled (bottom-up)
+
+        nkSize_t marginRequest = child->sizeRequest;
+        marginRequest.width += child->margin.left + child->margin.right;
+        marginRequest.height += child->margin.top + child->margin.bottom;
+
         if (child->dockPosition == DOCK_POSITION_LEFT || child->dockPosition == DOCK_POSITION_RIGHT)
         {
-            total.width += child->sizeRequest.width;
+            total.width += marginRequest.width;
             
-            if (child->sizeRequest.height > total.height)
+            if (marginRequest.height > total.height)
             {
-                total.height = child->sizeRequest.height;
+                total.height = marginRequest.height;
             }
                 
         }
         else if (child->dockPosition == DOCK_POSITION_TOP || child->dockPosition == DOCK_POSITION_BOTTOM)
         {
-            total.height += child->sizeRequest.height;
-
-            if (child->sizeRequest.width > total.width)
+            total.height += marginRequest.height;
+            
+            if (marginRequest.width > total.width)
             {
-                total.width = child->sizeRequest.width;
+                total.width = marginRequest.width;
             }
         }
 
@@ -128,11 +133,15 @@ static void ArrangeCallback(nkView_t *view)
 
         nkRect_t childRect = client;
 
+        nkSize_t marginRequest = child->sizeRequest;
+        marginRequest.width += child->margin.left + child->margin.right;
+        marginRequest.height += child->margin.top + child->margin.bottom;
+
         switch (child->dockPosition)
         {
             case DOCK_POSITION_LEFT:
             {
-                childRect.width = child->sizeRequest.width;
+                childRect.width = marginRequest.width;
                 childRect.height = client.height;
                 
                 if (childRect.width > client.width)
@@ -146,8 +155,8 @@ static void ArrangeCallback(nkView_t *view)
 
             case DOCK_POSITION_RIGHT:
             {
-                childRect.x = client.x + client.width - child->sizeRequest.width;
-                childRect.width = child->sizeRequest.width;
+                childRect.x = client.x + client.width - marginRequest.width;
+                childRect.width = marginRequest.width;
                 
                 if (childRect.width > client.width)
                 {
@@ -160,7 +169,7 @@ static void ArrangeCallback(nkView_t *view)
 
             case DOCK_POSITION_TOP:
             {
-                childRect.height = child->sizeRequest.height;
+                childRect.height = marginRequest.height;
                 childRect.width = client.width;
                 
                 if (childRect.height > client.height)
@@ -175,8 +184,8 @@ static void ArrangeCallback(nkView_t *view)
             case DOCK_POSITION_BOTTOM:
             {
 
-                childRect.y = client.y + client.height - child->sizeRequest.height;
-                childRect.height = child->sizeRequest.height;
+                childRect.y = client.y + client.height - marginRequest.height;
+                childRect.height = marginRequest.height;
                 
                 if (childRect.height > client.height)
                 {
@@ -193,9 +202,8 @@ static void ArrangeCallback(nkView_t *view)
             } break;
         }
 
+        nkView_PlaceView(child, childRect);
 
-        child->frame = childRect;
         child = child->sibling;
-       
     }
 }

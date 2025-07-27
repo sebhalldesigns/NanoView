@@ -60,7 +60,7 @@ typedef enum
 
 typedef void (*ViewMeasureCallback_t)(struct nkView_t *view); 
 typedef void (*ViewArrangeCallback_t)(struct nkView_t *view);
-typedef void (*ViewDrawCallback_t)(struct nkView_t *view); 
+typedef void (*ViewDrawCallback_t)(struct nkView_t *view, nkDrawContext_t *context);
 typedef void (*ViewDestroyCallback_t)(struct nkView_t *view); /* called when view is destroyed */
 
 typedef void (*PointerHoverCallback_t)(struct nkView_t *view, nkPointerHover_t event);
@@ -70,6 +70,7 @@ typedef void (*ScrollCallback_t)(struct nkView_t *view, float delta);
 
 typedef enum 
 {
+    ALIGNMENT_STRETCH,
     ALIGNMENT_LEFT,
     ALIGNMENT_CENTER,
     ALIGNMENT_RIGHT
@@ -77,18 +78,11 @@ typedef enum
 
 typedef enum 
 {
+    ALIGNMENT_FILL,
     ALIGNMENT_TOP,
     ALIGNMENT_MIDDLE,
     ALIGNMENT_BOTTOM
 } nkVerticalAlignment_t;
-
-typedef enum
-{
-    STRETCH_NONE,
-    STRETCH_HORIZONTAL,
-    STRETCH_VERTICAL,
-    STRETCH_BOTH
-} nkStretchType_t;
 
 typedef enum
 {
@@ -113,6 +107,7 @@ typedef struct nkView_t
 
     nkRect_t frame; /* overwritten in layout phase */
     nkSize_t sizeRequest;
+    nkThickness_t margin; 
 
     /* tree structure handles */
     struct nkView_t *parent; /* can be NULL*/
@@ -126,9 +121,7 @@ typedef struct nkView_t
     bool capturePointerAction;
     bool captureScroll;
 
-
     /* Generic layout requests to parent */
-    nkStretchType_t stretchType;
     nkHorizontalAlignment_t horizontalAlignment;
     nkVerticalAlignment_t verticalAlignment;
 
@@ -192,5 +185,7 @@ nkView_t *nkView_PreviousSiblingView(nkView_t *view);
 /* HIT TESTING */
 nkView_t *nkView_HitTest(nkView_t *view, float x, float y); /* in window co-ordinates */
 
+/* LAYOUT */
+void nkView_PlaceView(nkView_t *view, nkRect_t frame); /* places the view at the given frame, applying alignment and margin */
 
 #endif /* NANOVIEW_H */

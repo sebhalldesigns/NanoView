@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 /***************************************************************
 ** MARK: CONSTANTS & MACROS
@@ -56,9 +57,8 @@ bool nkView_Create(nkView_t *view, const char *name)
     view->prevSibling = NULL;
     view->child = NULL;
 
-    view->stretchType = STRETCH_NONE;
-    view->horizontalAlignment = ALIGNMENT_CENTER;
-    view->verticalAlignment = ALIGNMENT_MIDDLE;
+    view->horizontalAlignment = ALIGNMENT_STRETCH;
+    view->verticalAlignment = ALIGNMENT_FILL;
 
     view->dockPosition = DOCK_POSITION_TOP;
     view->gridLocation = (nkGridLocation_t){0, 0, 1, 1};
@@ -168,7 +168,7 @@ void nkView_RenderTree(nkView_t *root, nkDrawContext_t *drawContext)
 
         if (view->drawCallback)
         {
-            view->drawCallback(view);
+            view->drawCallback(view, drawContext);
         }
 
         view = nkView_NextViewInTree(view);
@@ -610,6 +610,92 @@ nkView_t* nkView_HitTest(nkView_t *view, float x, float y)
     /* this view doesn't want events, so treat as invisible */
     return NULL;
 }
+
+/* places the view at the given frame, applying alignment and margin */
+void nkView_PlaceView(nkView_t *view, nkRect_t frame)
+{
+    if (view == NULL)
+    {
+        return;
+    }
+
+    /* fit child to frame */
+    switch (view->verticalAlignment)
+    {
+        case ALIGNMENT_TOP:
+        {
+            view->frame.height = fminf(view->sizeRequest.height, frame.height);
+            view->frame.y = frame.y + view->margin.top;
+        } break;
+
+        case ALIGNMENT_MIDDLE:
+        {
+            view->frame.height = fminf(view->sizeRequest.height, frame.height);
+            view->frame.y = frame.y + (frame.height - view->frame.height) / 2.0f;
+
+            if (view->frame.y < frame.y + view->margin.top)
+            {
+                view->frame.y = frame.y + view->margin.top; /* Ensure it doesn't go above the margin */
+            }
+        } break;
+
+        case ALIGNMENT_BOTTOM:
+        {
+            view->frame.height = fminf(view->sizeRequest.height, frame.height);
+            view->frame.y = frame.y + (frame.height - view->frame.height);
+
+            if (view->frame.y + view->frame.height > frame.y + frame.height - view->margin.bottom)
+            {
+                view->frame.y = frame.y + frame.height - view->frame.height - view->margin.bottom; /* Ensure it doesn't go below the margin */
+            }
+        } break;
+
+        default:
+        {
+            view->frame.height = frame.height - view->margin.top - view->margin.bottom;
+            view->frame.y = frame.y + view->margin.top;
+        } break;
+    }
+
+    switch (view->horizontalAlignment)
+    {
+        case ALIGNMENT_LEFT:
+        {
+            view->frame.width = fminf(view->sizeRequest.width, frame.width);
+            view->frame.x = frame.x + view->margin.left;
+        } break;
+
+        case ALIGNMENT_CENTER:
+        {
+            view->frame.width = fminf(view->sizeRequest.width, frame.width);
+            view->frame.x = frame.x + (frame.width - view->frame.width) / 2.0f;
+
+            if (view->frame.x < frame.x + view->margin.left)
+            {
+                view->frame.x = frame.x + view->margin.left; /* Ensure it doesn't go before the margin */
+            }
+        } break;
+
+        case ALIGNMENT_RIGHT:
+        {
+            view->frame.width = fminf(view->sizeRequest.width, frame.width);
+            view->frame.x = frame.x + (frame.width - view->frame.width);
+
+            if (view->frame.x + view->frame.width > frame.x + frame.width - view->margin.right)
+            {
+                view->frame.x = frame.x + frame.width - view->frame.width - view->margin.right; /* Ensure it doesn't go after the margin */
+            }
+        } break;
+
+        default:
+        {
+            view->frame.width = frame.width - view->margin.left - view->margin.right;
+            view->frame.x = frame.x + view->margin.left;
+        } break;
+    }
+    
+}
+
 
 /***************************************************************
 ** MARK: STATIC FUNCTIONS

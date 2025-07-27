@@ -2,17 +2,17 @@
 **
 ** NanoKit Library Header File
 **
-** File         :  nkbutton.h
+** File         :  nklabel.h
 ** Module       :  views
 ** Author       :  SH
 ** Created      :  2025-07-27 (YYYY-MM-DD)
 ** License      :  MIT
-** Description  :  NanoKit Button Control header file
+** Description  :  NanoKit Label Control header file
 **
 ***************************************************************/
 
-#ifndef NKBUTTON_H
-#define NKBUTTON_H
+#ifndef NKLABEL_H
+#define NKLABEL_H
 
 /***************************************************************
 ** MARK: INCLUDES
@@ -28,10 +28,6 @@
 ** MARK: TYPEDEFS
 ***************************************************************/
 
-struct nkButton_t; /* forward declaration */
-
-typedef void (*ButtonCallback_t)(struct nkButton_t *button);
-
 typedef struct 
 {
     nkView_t view;          /* view */
@@ -42,23 +38,16 @@ typedef struct
     nkFont_t *font;         /* button font */
     nkColor_t foreground; 
 
-    float cornerRadius;     /* corner radius for rounded buttons */
     nkColor_t background;   /* button background color */
-
-    ButtonCallback_t onClick; /* callback for button click */
-
-    /* state */
-    bool isHighlighted; /* true if the button is highlighted */
-    bool isPressed;     /* true if the button is pressed */
     
-} nkButton_t;
+} nkLabel_t;
 
 /***************************************************************
 ** MARK: FUNCTION DEFS
 ***************************************************************/
 
-bool nkButton_Create(nkButton_t *button);
+bool nkLabel_Create(nkLabel_t *label);
 
-void nkButton_Destroy(nkButton_t *button);
+void nkLabel_Destroy(nkLabel_t *label);
 
-#endif /* NKBUTTON_H */
+#endif /* NKLABEL_H */

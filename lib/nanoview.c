@@ -50,8 +50,8 @@ bool nkView_Create(nkView_t *view, const char *name)
 
     view->frame = (nkRect_t){0, 0, 0, 0};
     view->sizeRequest = (nkSize_t){0, 0};
+    view->margin = (nkThickness_t){0, 0, 0, 0};
 
-    
     view->parent = NULL;
     view->sibling = NULL;
     view->prevSibling = NULL;

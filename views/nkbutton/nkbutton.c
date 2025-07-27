@@ -7,7 +7,7 @@
 ** Author       :  SH
 ** Created      :  2025-02-23 (YYYY-MM-DD)
 ** License      :  MIT
-** Description  :  NanoKit View API
+** Description  :  NanoKit Button Control
 **
 ***************************************************************/
 
@@ -95,15 +95,15 @@ static void DrawCallback(nkView_t *view, nkDrawContext_t *context)
 
         if (button->isPressed)
         {
-            bgColor.r /= 1.5f;
-            bgColor.g /= 1.5f;
-            bgColor.b /= 1.5f;
+            bgColor.r *= 1.4f;
+            bgColor.g *= 1.4f;
+            bgColor.b *= 1.4f;
         }
         else if (button->isHighlighted)
         {
-            bgColor.r *= 1.5f;
-            bgColor.g *= 1.5f;
-            bgColor.b *= 1.5f;
+            bgColor.r *= 1.3f;
+            bgColor.g *= 1.3f;
+            bgColor.b *= 1.3f;
         }
 
         nkDraw_SetColor(context, bgColor);
@@ -112,8 +112,8 @@ static void DrawCallback(nkView_t *view, nkDrawContext_t *context)
 
     if (button->text)
     {
-        nkDraw_SetColor(context, button->foreground);
-        nkDraw_Text(context, button->font, button->text, view->frame.x + button->padding.left, view->frame.y + 8.0f + button->padding.top);
+        nkDraw_SetColor(context, NK_COLOR_BLACK);
+        nkDraw_Text(context, button->font, button->text, view->frame.x + button->padding.left, view->frame.y + 12.0f + button->padding.top);
     }
 
 }

@@ -7,6 +7,7 @@ add_library(NanoView STATIC
     
     views/nkdockview/nkdockview.c
     views/nkbutton/nkbutton.c
+    views/nklabel/nklabel.c
 )
 
 target_include_directories(NanoView PUBLIC

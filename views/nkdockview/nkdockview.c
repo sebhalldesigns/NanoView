@@ -76,10 +76,11 @@ void nkDockPanel_Destroy(nkDockView_t *dockView)
 
 static void MeasureCallback(nkView_t *view)
 {
-    //printf("DOCKPANEL MEASURE\n");
 
     nkSize_t total = {0, 0};
     nkView_t *child = view->child;
+
+    nkSize_t largestRequest = {0, 0};
 
     while (child)
     {
@@ -92,23 +93,32 @@ static void MeasureCallback(nkView_t *view)
         {
             total.width += marginRequest.width;
             
-            if (marginRequest.height > total.height)
+            if (marginRequest.height > total.height && marginRequest.height > largestRequest.height)
             {
-                total.height = marginRequest.height;
+                largestRequest.height = marginRequest.height;
             }
-                
         }
         else if (child->dockPosition == DOCK_POSITION_TOP || child->dockPosition == DOCK_POSITION_BOTTOM)
         {
             total.height += marginRequest.height;
             
-            if (marginRequest.width > total.width)
+            if (marginRequest.width > total.width && marginRequest.width > largestRequest.width)
             {
-                total.width = marginRequest.width;
+                largestRequest.width = marginRequest.width;
             }
         }
 
         child = child->sibling;
+    }
+
+    if (largestRequest.width > total.width)
+    {
+        total.width = largestRequest.width;
+    }
+
+    if (largestRequest.height > total.height)
+    {
+        total.height = largestRequest.height;
     }
 
     view->sizeRequest = total;

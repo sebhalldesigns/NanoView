@@ -38,6 +38,7 @@
 ***************************************************************/
 
 static void DrawCallback(nkView_t *view, nkDrawContext_t *context);
+static void MeasureCallback(nkView_t *view, nkDrawContext_t *context);
 
 /***************************************************************
 ** MARK: PUBLIC FUNCTIONS
@@ -54,9 +55,15 @@ bool nkLabel_Create(nkLabel_t *label)
     label->text = NULL;
 
     label->view.drawCallback = DrawCallback;
+    label->view.measureCallback = MeasureCallback;
 
     label->view.data = label;
     label->view.dataSize = sizeof(nkLabel_t);
+
+    label->foreground = NK_COLOR_BLACK; /* Default foreground color */
+    label->padding = nkThickness_FromConstant(0.0f);
+    label->view.margin = nkThickness_FromConstant(0.0f);
+
 
     return true;
 }
@@ -89,8 +96,24 @@ static void DrawCallback(nkView_t *view, nkDrawContext_t *context)
 
     if (label->text)
     {
-        nkDraw_SetColor(context, NK_COLOR_BLACK);
+        nkDraw_SetColor(context, label->foreground);
         nkDraw_Text(context, label->font, label->text, view->frame.x + label->padding.left, view->frame.y + 12.0f + label->padding.top);
     }
+
+}
+
+static void MeasureCallback(nkView_t *view, nkDrawContext_t *context)
+{
+    nkLabel_t *label = (nkLabel_t *)view->data;
+
+    if (label == NULL)
+    {
+        return;
+    }
+
+    nkRect_t textFrame = nkDraw_MeasureText(context, label->font, label->text ? label->text : "");
+
+    view->sizeRequest.width = textFrame.width + label->padding.left + label->padding.right;
+    view->sizeRequest.height = textFrame.height + label->padding.top + label->padding.bottom;
 
 }

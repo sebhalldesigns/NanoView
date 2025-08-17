@@ -80,7 +80,7 @@ static void MeasureCallback(nkView_t *view, nkDrawContext_t *context)
     nkSize_t total = {0, 0};
     nkView_t *child = view->child;
 
-    nkSize_t largestRequest = {0, 0};
+    nkSize_t largestRequest = {view->sizeRequest.width, view->sizeRequest.height};
 
     while (child)
     {

@@ -44,7 +44,7 @@ typedef struct
 
     float cornerRadius;     /* corner radius for rounded buttons */
     nkColor_t background;   /* button background color */
-
+    
     ButtonCallback_t onClick; /* callback for button click */
 
     /* state */

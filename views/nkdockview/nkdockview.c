@@ -38,8 +38,8 @@
 ** MARK: STATIC FUNCTION DEFS
 ***************************************************************/
 
-static void MeasureCallback(nkView_t *view);
-static void ArrangeCallback(nkView_t *view);
+static void MeasureCallback(nkView_t *view, nkDrawContext_t *context);
+static void ArrangeCallback(nkView_t *view, nkDrawContext_t *context);
 
 /***************************************************************
 ** MARK: PUBLIC FUNCTIONS
@@ -74,7 +74,7 @@ void nkDockPanel_Destroy(nkDockView_t *dockView)
 ** MARK: STATIC FUNCTIONS
 ***************************************************************/
 
-static void MeasureCallback(nkView_t *view)
+static void MeasureCallback(nkView_t *view, nkDrawContext_t *context)
 {
 
     nkSize_t total = {0, 0};
@@ -124,7 +124,7 @@ static void MeasureCallback(nkView_t *view)
     view->sizeRequest = total;
 }
 
-static void ArrangeCallback(nkView_t *view)
+static void ArrangeCallback(nkView_t *view, nkDrawContext_t *context)
 {
 
     //printf("DOCKPANEL ARRANGE\n");
@@ -135,9 +135,11 @@ static void ArrangeCallback(nkView_t *view)
     while (child)
     {
 
+        /* i.e last child fill */
         if (!child->sibling)
         {
-            child->frame = client;
+            //child->frame = client;
+            nkView_PlaceView(child, client);
             return;
         }
 

@@ -87,7 +87,7 @@ void nkView_Destroy(nkView_t *view)
     return;
 }
 
-void nkView_LayoutTree(nkView_t *root, nkSize_t size)
+void nkView_LayoutTree(nkView_t *root, nkSize_t size, nkDrawContext_t *context)
 {
     if (root == NULL)
     {
@@ -109,7 +109,7 @@ void nkView_LayoutTree(nkView_t *root, nkSize_t size)
     {
         if (view->measureCallback)
         {
-            view->measureCallback(view);
+            view->measureCallback(view, context);
         }
 
         view = nkView_PreviousViewInTree(view);
@@ -137,7 +137,7 @@ void nkView_LayoutTree(nkView_t *root, nkSize_t size)
 
         if (view->arrangeCallback)
         {
-            view->arrangeCallback(view);
+            view->arrangeCallback(view, context);
         }
 
         view = nkView_NextViewInTree(view);

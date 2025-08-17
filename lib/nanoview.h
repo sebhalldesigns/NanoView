@@ -58,8 +58,8 @@ typedef enum
     NK_POINTER_ACTION_EXTENDED_2        = 0x05
 } nkPointerAction_t;
 
-typedef void (*ViewMeasureCallback_t)(struct nkView_t *view); 
-typedef void (*ViewArrangeCallback_t)(struct nkView_t *view);
+typedef void (*ViewMeasureCallback_t)(struct nkView_t *view, nkDrawContext_t *context); 
+typedef void (*ViewArrangeCallback_t)(struct nkView_t *view, nkDrawContext_t *context);
 typedef void (*ViewDrawCallback_t)(struct nkView_t *view, nkDrawContext_t *context);
 typedef void (*ViewDestroyCallback_t)(struct nkView_t *view); /* called when view is destroyed */
 
@@ -158,7 +158,7 @@ bool nkView_Create(nkView_t *view, const char *name);
 void nkView_Destroy(nkView_t *view);
 
 /* VIEW TREE USAGE */
-void nkView_LayoutTree(nkView_t *root, nkSize_t size);
+void nkView_LayoutTree(nkView_t *root, nkSize_t size, nkDrawContext_t *drawContext);
 void nkView_RenderTree(nkView_t *root, nkDrawContext_t *drawContext);
 void nkView_ProcessPointerMovement(nkView_t *root, float x, float y, nkView_t **hotView, nkView_t *activeView, nkPointerAction_t activeAction);
 void nkView_ProcessPointerAction(nkView_t *root, nkPointerAction_t action, nkPointerEvent_t event, float x, float y, nkView_t *hotView, nkView_t **activeView, nkPointerAction_t *activeAction);

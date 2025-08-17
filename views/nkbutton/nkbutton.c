@@ -38,7 +38,10 @@
 ***************************************************************/
 
 static void DrawCallback(nkView_t *view, nkDrawContext_t *context);
+static void MeasureCallback(nkView_t *view, nkDrawContext_t *context);
+
 static void HoverCallback(nkView_t *view, nkPointerHover_t hover);
+
 static void PointerActionCallback(nkView_t *view, nkPointerAction_t action, nkPointerEvent_t event, float x, float y);
 
 /***************************************************************
@@ -56,9 +59,12 @@ bool nkButton_Create(nkButton_t *button)
     button->text = NULL;
     button->onClick = NULL;
 
+    button->view.backgroundColor = NK_COLOR_TRANSPARENT;
+
     button->view.data = button;
     button->view.dataSize = sizeof(nkButton_t);
     button->view.drawCallback = DrawCallback;
+    button->view.measureCallback = MeasureCallback;
 
     button->view.pointerHoverCallback = HoverCallback;
     button->view.capturePointerHover = true; /* Enable pointer hover capture */
@@ -67,6 +73,14 @@ bool nkButton_Create(nkButton_t *button)
 
     button->isHighlighted = false; /* Initial state is not highlighted */
     button->isPressed = false; /* Initial state is not pressed */
+
+    button->background = nkColor_FromHexRGB(0xF0F0F0);
+    button->padding = nkThickness_FromConstant(5.0f);
+    button->view.margin = nkThickness_FromConstant(5.0f);
+
+
+    button->view.verticalAlignment = ALIGNMENT_CENTER; /* Center vertically */
+    button->view.horizontalAlignment = ALIGNMENT_MIDDLE; /* Center horizontally */
 
     return true;
 }
@@ -95,15 +109,11 @@ static void DrawCallback(nkView_t *view, nkDrawContext_t *context)
 
         if (button->isPressed)
         {
-            bgColor.r *= 1.4f;
-            bgColor.g *= 1.4f;
-            bgColor.b *= 1.4f;
+            bgColor = nkColor_FromHexRGB(0xE0E0E0);
         }
         else if (button->isHighlighted)
         {
-            bgColor.r *= 1.3f;
-            bgColor.g *= 1.3f;
-            bgColor.b *= 1.3f;
+            bgColor = nkColor_FromHexRGB(0xFFFFFF);
         }
 
         nkDraw_SetColor(context, bgColor);
@@ -115,6 +125,22 @@ static void DrawCallback(nkView_t *view, nkDrawContext_t *context)
         nkDraw_SetColor(context, NK_COLOR_BLACK);
         nkDraw_Text(context, button->font, button->text, view->frame.x + button->padding.left, view->frame.y + 12.0f + button->padding.top);
     }
+
+}
+
+static void MeasureCallback(nkView_t *view, nkDrawContext_t *context)
+{
+    nkButton_t *button = (nkButton_t *)view->data;
+
+    if (button == NULL)
+    {
+        return;
+    }
+
+    nkRect_t textFrame = nkDraw_MeasureText(context, button->font, button->text ? button->text : "");
+
+    view->sizeRequest.width = textFrame.width + button->padding.left + button->padding.right;
+    view->sizeRequest.height = textFrame.height + button->padding.top + button->padding.bottom;
 
 }
 

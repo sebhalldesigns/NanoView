@@ -74,7 +74,7 @@ bool nkButton_Create(nkButton_t *button)
     button->isHighlighted = false; /* Initial state is not highlighted */
     button->isPressed = false; /* Initial state is not pressed */
 
-    button->background = nkColor_FromHexRGB(0xF0F0F0);
+    button->background = nkColor_FromHexRGB(0xE0E0E0);
     button->padding = nkThickness_FromConstant(5.0f);
     button->view.margin = nkThickness_FromConstant(5.0f);
 
@@ -107,17 +107,45 @@ static void DrawCallback(nkView_t *view, nkDrawContext_t *context)
     {
         nkColor_t bgColor = button->background;
 
-        if (button->isPressed)
+        if (button->isHighlighted)
         {
-            bgColor = nkColor_FromHexRGB(0xE0E0E0);
-        }
-        else if (button->isHighlighted)
-        {
-            bgColor = nkColor_FromHexRGB(0xFFFFFF);
+            bgColor = nkColor_FromHexRGB(0xF8F8F8);
         }
 
-        nkDraw_SetColor(context, bgColor);
-        nkDraw_Rect(context, view->frame.x, view->frame.y, view->frame.width, view->frame.height);
+        nkDraw_SetColorGradient(
+            context, 
+            nkColor_Lighten(bgColor, 0.5f), 
+            bgColor, 
+            0.0f, 
+            view->frame.x, view->frame.y, 
+            view->frame.width, view->frame.height
+        );
+
+        nkDraw_RoundedRect(
+            context, 
+            view->frame.x, view->frame.y, 
+            view->frame.width, view->frame.height, 
+            5.0f
+        );
+
+        nkDraw_SetStrokeWidth(context, 1.0f);
+
+        nkDraw_SetStrokeColorGradient(
+            context, 
+            nkColor_Lighten(bgColor, 0.75f), 
+            nkColor_Darken(bgColor, 0.125f), 
+            0.0f, 
+            view->frame.x, view->frame.y, 
+            view->frame.width, view->frame.height
+        );
+
+        nkDraw_RoundedRectPath(
+            context, 
+            view->frame.x, view->frame.y, 
+            view->frame.width, view->frame.height, 
+            5.0f
+        );
+
     }
 
     if (button->text)

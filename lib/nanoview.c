@@ -145,6 +145,60 @@ void nkView_LayoutTree(nkView_t *root, nkSize_t size, nkDrawContext_t *context)
 
 }
 
+void nkView_LayoutSubtree(nkView_t *root, nkDrawContext_t *context)
+{
+    if (root == NULL)
+    {
+        return;
+    }
+
+    nkView_t *view = root;
+
+    /* MEASURE PASS */
+
+    view = nkView_DeepestViewInTree(root);
+    
+    /* measure views in a bottom-up traversal */
+
+    while (view)
+    {
+        if (view->measureCallback)
+        {
+            view->measureCallback(view, context);
+        }
+
+        view = nkView_PreviousViewInTree(view);
+    }
+
+    /* ARRANGE PASS */
+
+    view = root;
+
+    /* clamp root to size */
+
+    if (root->sizeRequest.width > root->frame.width)
+    {
+        root->frame.width = root->sizeRequest.width;
+    }
+    
+    if (root->sizeRequest.height > root->frame.height)
+    {
+        root->frame.height = root->sizeRequest.height;
+    }
+
+    /* arrange views in top-down */
+    while (view)
+    {
+
+        if (view->arrangeCallback)
+        {
+            view->arrangeCallback(view, context);
+        }
+
+        view = nkView_NextViewInTree(view);
+    }
+}
+
 void nkView_RenderTree(nkView_t *root, nkDrawContext_t *drawContext)
 {
     if (root == NULL || drawContext == NULL)
@@ -284,6 +338,19 @@ void nkView_ProcessPointerAction(nkView_t *root, nkPointerAction_t action, nkPoi
         {
             /* double click, TODO */
         } break;
+    }
+}
+
+void nkView_ProcessScroll(nkView_t *root, float delta, nkView_t *hotView)
+{
+    if (root == NULL || hotView == NULL)
+    {
+        return;
+    }
+
+    if (hotView->captureScroll && hotView->scrollCallback)
+    {
+        hotView->scrollCallback(hotView, delta);
     }
 }
 

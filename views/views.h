@@ -20,6 +20,7 @@
 
 #include "nkdockview/nkdockview.h"  
 #include "nkstackview/nkstackview.h"  
+#include "nkscrollview/nkscrollview.h"
 
 #include "nkbutton/nkbutton.h"
 #include "nklabel/nklabel.h"

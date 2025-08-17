@@ -115,7 +115,7 @@ static void DrawCallback(nkView_t *view, nkDrawContext_t *context)
 
         if (button->isHighlighted)
         {
-            baseColor = nkColor_FromHexRGB(0xF8F8F8);
+            baseColor = nkColor_Lighten(baseColor, 0.5f);
         }
 
         if (button->isPressed)

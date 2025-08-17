@@ -100,6 +100,7 @@ bool nkScrollView_Create(nkScrollView_t *scrollView)
     scrollView->dragOrigin = (nkPoint_t){0, 0};
 
     scrollView->needsLayout = false; /* Initially needs layout */
+    scrollView->view.clipToBounds = true; /* Clip to bounds by default */
 
     return true;
 }

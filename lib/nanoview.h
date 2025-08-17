@@ -109,6 +109,8 @@ typedef struct nkView_t
     nkSize_t sizeRequest;
     nkThickness_t margin; 
 
+    bool clipToBounds;
+
     /* tree structure handles */
     struct nkView_t *parent; /* can be NULL*/
     struct nkView_t *sibling; /* can be NULL*/
@@ -183,6 +185,7 @@ nkView_t *nkView_FirstChildView(nkView_t *view);
 nkView_t *nkView_LastChildView(nkView_t *view);
 nkView_t *nkView_NextSiblingView(nkView_t *view);
 nkView_t *nkView_PreviousSiblingView(nkView_t *view);
+size_t nkView_GetDepthInTree(nkView_t *view);
 
 /* HIT TESTING */
 nkView_t *nkView_HitTest(nkView_t *view, float x, float y); /* in window co-ordinates */

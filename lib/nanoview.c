@@ -74,6 +74,8 @@ bool nkView_Create(nkView_t *view, const char *name)
     view->data = NULL;
     view->dataSize = 0; /* size of the data in bytes */
 
+    view->clipToBounds = false;
+
     return view;
 }
 
@@ -206,6 +208,7 @@ void nkView_RenderTree(nkView_t *root, nkDrawContext_t *drawContext)
         return;
     }
 
+    int prevDepth = -1;
     nkView_t *view = root;
 
     /* render views in a top-down traversal (this is actually bottom up in visual tree 
@@ -213,6 +216,25 @@ void nkView_RenderTree(nkView_t *root, nkDrawContext_t *drawContext)
 
     while (view)
     {
+        int currentDepth = (int)nkView_GetDepthInTree(view);
+
+        if (currentDepth <= prevDepth)
+        {
+            /* restore context if we are going up in the tree */
+            int depthDiff = prevDepth - currentDepth + 1;
+            for (int i = 0; i < depthDiff; i++)
+            {
+                nkDraw_RestoreContext(drawContext);
+            }
+        }
+
+        /* always save context */
+        nkDraw_SaveContext(drawContext);
+
+        if (view->clipToBounds)
+        {
+            nkDraw_SetClipRect(drawContext, view->frame);
+        }
 
         if (view->backgroundColor.a > 0.001f)
         {
@@ -225,7 +247,18 @@ void nkView_RenderTree(nkView_t *root, nkDrawContext_t *drawContext)
             view->drawCallback(view, drawContext);
         }
 
+        prevDepth = currentDepth;
+
         view = nkView_NextViewInTree(view);
+    }
+
+    if (prevDepth > -1)
+    {
+        int finalPopCount = prevDepth + 1;
+        for (int i = 0; i < finalPopCount; i++)
+        {
+            nkDraw_RestoreContext(drawContext);
+        }
     }
 
 }
@@ -634,6 +667,24 @@ nkView_t *nkView_PreviousSiblingView(nkView_t *view)
     }
 
     return view->prevSibling;
+}
+
+size_t nkView_GetDepthInTree(nkView_t *view)
+{
+    if (view == NULL)
+    {
+        return 0;
+    }
+
+    size_t depth = 0;
+
+    while (view->parent != NULL)
+    {
+        depth++;
+        view = view->parent;
+    }
+
+    return depth;
 }
 
 nkView_t* nkView_HitTest(nkView_t *view, float x, float y)

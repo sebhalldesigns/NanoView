@@ -47,7 +47,7 @@ static void ArrangeCallback(nkView_t *view, nkDrawContext_t *context);
 
 bool nkDockView_Create(nkDockView_t *dockView)
 {
-    if (!nkView_Create(&dockView->view, "DockPanel"))
+    if (!nkView_Create(&dockView->view, "DockView"))
     {
         return false;
     }
@@ -127,7 +127,12 @@ static void MeasureCallback(nkView_t *view, nkDrawContext_t *context)
 static void ArrangeCallback(nkView_t *view, nkDrawContext_t *context)
 {
 
-    //printf("DOCKPANEL ARRANGE\n");
+    nkDockView_t *dockView = (nkDockView_t *)view->data;
+
+    if (!dockView || view->dataSize != sizeof(nkDockView_t))
+    {
+        return;
+    }
 
     nkRect_t client = view->frame; /* available space inside this view */
     nkView_t *child = view->child;
@@ -136,9 +141,8 @@ static void ArrangeCallback(nkView_t *view, nkDrawContext_t *context)
     {
 
         /* i.e last child fill */
-        if (!child->sibling)
+        if (!child->sibling && dockView->lastChildFill)
         {
-            //child->frame = client;
             nkView_PlaceView(child, client);
             return;
         }

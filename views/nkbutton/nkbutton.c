@@ -129,8 +129,6 @@ static void DrawCallback(nkView_t *view, nkDrawContext_t *context)
             borderBottom = nkColor_Darken(baseColor, 0.125f);
         }
 
-    
-
         nkDraw_SetColorGradient(
             context, 
             nkColor_Lighten(baseColor, 0.5f),

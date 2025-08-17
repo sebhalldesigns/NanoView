@@ -2,28 +2,23 @@
 **
 ** NanoKit Library Header File
 **
-** File         :  views.h
-** Module       :  nanoview
+** File         :  nkstackview.h
+** Module       :  views
 ** Author       :  SH
-** Created      :  2025-08-16 (YYYY-MM-DD)
+** Created      :  2025-08-17 (YYYY-MM-DD)
 ** License      :  MIT
-** Description  :  NanoKit Library Views header file
+** Description  :  NanoKit Stack View header file
 **
 ***************************************************************/
 
-#ifndef VIEWS_H
-#define VIEWS_H
+#ifndef NKSTACKVIEW_H
+#define NKSTACKVIEW_H
 
 /***************************************************************
 ** MARK: INCLUDES
 ***************************************************************/
 
-#include "nkdockview/nkdockview.h"  
-#include "nkstackview/nkstackview.h"  
-
-#include "nkbutton/nkbutton.h"
-#include "nklabel/nklabel.h"
-
+#include <nanoview.h>
 
 /***************************************************************
 ** MARK: CONSTANTS & MACROS
@@ -33,8 +28,24 @@
 ** MARK: TYPEDEFS
 ***************************************************************/
 
+typedef enum
+{
+    STACK_ORIENTATION_HORIZONTAL,
+    STACK_ORIENTATION_VERTICAL
+} nkStackOrientation_t;
+
+typedef struct 
+{
+    nkView_t view;          /* view */
+    nkStackOrientation_t orientation;
+} nkStackView_t;
+
 /***************************************************************
 ** MARK: FUNCTION DEFS
 ***************************************************************/
 
-#endif /* VIEWS_H */
+bool nkStackView_Create(nkStackView_t *stackView);
+
+void nkStackView_Destroy(nkStackView_t *stackView);
+
+#endif /* NKSTACKVIEW_H */

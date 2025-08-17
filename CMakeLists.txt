@@ -6,6 +6,8 @@ add_library(NanoView STATIC
     lib/nanoview.c
     
     views/nkdockview/nkdockview.c
+    views/nkstackview/nkstackview.c
+
     views/nkbutton/nkbutton.c
     views/nklabel/nklabel.c
 )

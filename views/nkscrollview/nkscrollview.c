@@ -147,6 +147,10 @@ static void ArrangeCallback(nkView_t *view, nkDrawContext_t *context)
         scrollView->verticalScrollRatio = view->child->frame.height / view->frame.height;
         scrollView->horizontalScrollRatio = view->child->frame.width / view->frame.width;
 
+        /* clip scroll offset to max value */
+        scrollView->verticalScrollOffset = fmaxf(0.0f, fminf(1.0f - (1.0f / scrollView->verticalScrollRatio), scrollView->verticalScrollOffset));
+        scrollView->horizontalScrollOffset = fmaxf(0.0f, fminf(1.0f - (1.0f / scrollView->horizontalScrollRatio), scrollView->horizontalScrollOffset));
+
         if (scrollView->verticalScrollRatio > 1.0f)
         {
             float barHeight = view->frame.height * (1.0f / scrollView->verticalScrollRatio);

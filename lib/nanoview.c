@@ -68,6 +68,10 @@ bool nkView_Create(nkView_t *view, const char *name)
     view->arrangeCallback = NULL;
     view->drawCallback = NULL;
     view->destroyCallback = NULL;
+    view->pointerHoverCallback = NULL;
+    view->pointerMovementCallback = NULL;
+    view->pointerActionCallback = NULL;
+    view->scrollCallback = NULL;
 
     view->backgroundColor = NK_COLOR_TRANSPARENT;
 
